@@ -19,6 +19,7 @@
 		<!-- OpenSans -->
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&amp;subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext,vietnamese" rel="stylesheet">
 		<!-- Calendar -->
+		<script src="http://vk.com/js/api/xd_connection.js?2";  type="text/javascript"></script>
 		<style>
 			/* Calendar */
 			html, body,
@@ -266,9 +267,15 @@
 			});
 
 			function GetUser(id) {
-				$.get("https://api.vk.com/method/users.get?uid=68915050&access_token=572ff673572ff673572ff673795730befd5572f572ff6730fdf4c3483bbcbd5c2ab8229&fields=photo&lang=en", function(data){
-					console.log(data)
-				});
+				var result;
+				$.ajax({
+					url: "https://api.vk.com/method/users.get?uid=" + id + "&fields=photo&lang=en",
+					method: 'GET',
+					dataType: 'JSONP',
+					success: function(data) {
+						result = data;
+					}});
+				console.log(result);
 			}
 
 			function EventForDate(date) {
