@@ -111,6 +111,11 @@
 				  </div>
 			  </div>
 		  </div>
+		<div class="ui modal" id="eventModal">
+		  <div class="header">Event for <span></span></div>
+		  <div class="content">
+			
+		  </div>
 		</div>
 		<script>
 			var events = new Array();
@@ -152,9 +157,19 @@
 					this.element.querySelector('.next').addEventListener('click', () => { this.show(++this.year); });
 					this.element.querySelectorAll('.D').forEach((element) => element.addEventListener('click', (event) => { this.callback(event.target.getAttribute('data-date')); }));
 					$(".D").popup('destroy');
-					$(".D").popup({
-						content: "Add event",
-						position: "bottom center"
+					$(".D").each(function(){
+						var event = EventForDate($(this).data("date"));
+						if(event == null) {
+							$(this).popup({
+								content: "Add event",
+								position: "bottom center"
+							});
+						} else {
+							$(this).popup({
+								title: event.Name,
+								position: "bottom center"
+							});
+						}
 					});
 				}
 			}
@@ -209,16 +224,22 @@
 			}
 			
 			calendar = new Calendar(document.getElementById('calendar'), 'en', function(date) {
-				$("#newEventName").val("");
-				$("#newEventDescription").val("");
-				$("#newMemberName").val("");
-				$("#newMemberLink").val("");
-				$("#membersInNewEvent").empty();
-				$("#newEventModal").data("date", date);
-				$("#newEventModal .header span").text(moment(date).format("Mo MMMM, YYYY"));
-				$("#newEventModal").modal({
-					blurring: true
-				}).modal('show');
+				if (EventForDate(date) == null) {
+					$("#newEventName").val("");
+					$("#newEventDescription").val("");
+					$("#newMemberName").val("");
+					$("#newMemberLink").val("");
+					$("#membersInNewEvent").empty();
+					$("#newEventModal").data("date", date);
+					$("#newEventModal .header span").text(moment(date).format("Mo MMMM, YYYY"));
+					$("#newEventModal").modal({
+						blurring: true
+					}).modal('show');
+				} else {
+					$("#eventModal").modal({
+						blurring: true
+					}).modal('show');			
+				}
 			});
 
 			function EventForDate(date) {
