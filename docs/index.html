@@ -65,7 +65,7 @@
 								#calendar > .YYYY > .M > .MM > .D:hover > .num { font-weight: 700; }
 								.member { margin: 7px 3px !important; }
 								.D { outline: none; }
-								.D:hover { background: #eaeaea !important; }
+								.D:hover { background: #eaeaea !important; color: #333333 !important; }
 								#newEventModal .buttons { margin-top: 20px; }
 								.D .circular { position: absolute; bottom: 5px; right: 7px;}
 		</style>
@@ -104,13 +104,15 @@
 			  </div>
 			</form>
 			<div class="field">
-				  <div class="ui buttons">
+			    <div class="ui buttons">
 				  	<button class="ui button" id="cancel">Cancel</button>
 				  	<div class="or"></div>
 				  	<button class="ui positive button" id="saveEvent" data-tooltip="Enter name and description">Save</button>
-				  </div>
-			  </div>
+			    </div>
+			</div>
 		  </div>
+		</div>
+
 		<div class="ui modal" id="eventModal">
 		  <div class="header">Event for <span></span></div>
 		  <div class="content">
@@ -262,6 +264,12 @@
 					}).modal('show');			
 				}
 			});
+
+			function GetUser(id) {
+				$.get("https://api.vk.com/method/users.get?uid=68915050&access_token=572ff673572ff673572ff673795730befd5572f572ff6730fdf4c3483bbcbd5c2ab8229&fields=photo&lang=en", function(data){
+					console.log(data)
+				});
+			}
 
 			function EventForDate(date) {
 				var result = $.grep(events, function(item, i){
