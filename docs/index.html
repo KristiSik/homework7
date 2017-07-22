@@ -114,7 +114,21 @@
 		<div class="ui modal" id="eventModal">
 		  <div class="header">Event for <span></span></div>
 		  <div class="content">
-			
+			<div class="ui items">
+			  <div class="item">
+			    <div class="content">
+			      <div class="header" id="eventName"></div>
+			      <div class="description" id="eventDescrtiption"></div>
+			    </div>
+			  </div>
+			</div>
+			<div id="membersInEvent"></div>
+			<button class="ui negative button" id="delete">
+			  Delete event
+			</button>
+			<button class="ui button" id="close">
+			  Close
+			</button>
 		  </div>
 		</div>
 		<script>
@@ -224,7 +238,8 @@
 			}
 			
 			calendar = new Calendar(document.getElementById('calendar'), 'en', function(date) {
-				if (EventForDate(date) == null) {
+				var event = EventForDate(date);
+				if (event == null) {
 					$("#newEventName").val("");
 					$("#newEventDescription").val("");
 					$("#newMemberName").val("");
@@ -236,6 +251,12 @@
 						blurring: true
 					}).modal('show');
 				} else {
+					$("#eventModal").data("date", event.Date);
+					$("#eventName").text(event.Name);
+					$("#eventDescrtiption").text(event.Description);
+					event.members.forEach(function(item, i, array){
+						$("#membersInEvent").append('<a class="ui image label member"><img src="https:\\semantic-ui.com/images/avatar/small/joe.jpg">' + item.Name + '</a>');
+					});
 					$("#eventModal").modal({
 						blurring: true
 					}).modal('show');			
