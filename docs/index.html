@@ -292,7 +292,11 @@
 			$("#addMember").on('click', function(){
 				var member_name = $("#newMemberName").val();
 				var member_link = $("#newMemberLink").val();
-				$("#membersInNewEvent").append('<div data-name="' + member_name + '" data-link="' + member_link + '" class="member ui image label"><img src="https:\\semantic-ui.com/images/avatar/small/ade.jpg">' + member_name + '<i class="delete icon"></i></div>');
+				if (member_link.length > 0 && member_name.length > 0) {
+					$("#membersInNewEvent").append('<div data-name="' + member_name + '" data-link="' + member_link + '" class="member ui image label"><img src="https:\\semantic-ui.com/images/avatar/small/ade.jpg">' + member_name + '<i class="delete icon"></i></div>');
+					$("#newMemberLink").val("");
+					$("#newMemberName").val("")
+				}
 			});
 			$(document).on('click', '.delete', function(){
 				$(this).parent().remove();
@@ -304,6 +308,17 @@
 				if ($("#newEventName").val().length > 1 && $("#newEventDescription").val().length > 1) {
 					AddNewEvent();
 				}
+			});
+			$("#delete").on('click', function(){
+				var index = events.indexOf(EventForDate($("#eventModal").data("date")));
+				if (index > -1) {
+					events.splice(index, 1);
+				}
+				calendar.show(calendar.year);
+				$("#eventModal").modal('hide');
+			});
+			$("#close").on('click', function(){
+				$("#eventModal").modal('hide');
 			});
 		</script>
 	</body>
