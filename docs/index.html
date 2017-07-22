@@ -63,19 +63,55 @@
 								#calendar > .YYYY > .M > .MM > .D:first-child[data-d="6"] { margin-left: calc(((100% + 6px) / 7) * 6 - 6px); }
 								#calendar > .YYYY > .M > .MM > .D > .num { position: absolute; font-size: 11px; top: 0px; left: 4px; }
 								#calendar > .YYYY > .M > .MM > .D:hover > .num { font-weight: 700; }
+								.member { margin: 7px 3px !important; }
+								.D { outline: none; }
+								.D:hover { background: #eaeaea !important; }
 		</style>
 	</head>
 	<body>
 		<div id="calendar"></div>
-		<div class="ui modal" id="NewEventModal">
-		  <div class="header"></div>
+		<div class="ui modal" id="newEventModal">
+		  <div class="header">New event for <span></span></div>
 		  <div class="content">
-		    <p></p>
-		    <p></p>
-		    <p></p>
+		  	<form class="ui form">
+			  <div class="field">
+			    <label>Name</label>
+			    <input type="text" name="first-name" placeholder="Event Name..." id="newEventName">
+			  </div>
+			  <div class="field">
+			    <label>Description</label>
+			    <textarea rows="3" name="last-name" placeholder="Description..." id="newEventDescription"></textarea> 
+			  </div>
+			  <div class="field">
+			  	<label>Members</label>
+			  	<div id="membersInNewEvent"></div>
+			  </div>
+			  <div class="field inline">
+			  	<div class="ui input">
+				  <input type="text" placeholder="Member name" id="newMemberName">
+				</div>
+				<div class="ui labeled input">
+				  <div class="ui label">
+				    https://
+				  </div>
+				  <input type="text" placeholder="facebook.com" id="newMemberLink">
+				</div>
+				<div class="ui icon button" id="addMember">
+				  <i class="add icon"></i>
+				</div>
+			  </div>
+			  <div class="field">
+				  <div class="ui buttons">
+				  	<button class="ui button" id="cancel">Cancel</button>
+				  	<div class="or"></div>
+				  	<button class="ui positive button" id="saveEvent">Save</button>
+				  </div>
+			  </div>
+			</form>
 		  </div>
 		</div>
 		<script>
+			var events = new Array();
 			/* Calendar */
 			class Calendar {
 				constructor(element, locale, callback) {
@@ -104,8 +140,29 @@
 					this.element.querySelector('.prev').addEventListener('click', () => { this.show(--this.year); });
 					this.element.querySelector('.next').addEventListener('click', () => { this.show(++this.year); });
 					this.element.querySelectorAll('.D').forEach((element) => element.addEventListener('click', (event) => { this.callback(event.target.getAttribute('data-date')); }));
+					$(".D").popup('destroy');
+					$(".D").popup({
+						content: "Add event",
+						position: "bottom center"
+					});
 				}
 			}
+
+			class Member {
+				constructor(name, link) {
+					this.name = name;
+					this.link = link;
+				}
+
+				get Name() {
+					return this.name;
+				}
+
+				get Link() {
+					return this.link;
+				}
+			}
+
 
 			class Event {
 				constructor() {
@@ -132,14 +189,37 @@
 					return this.description;
 				}
 
-				
+				AddMember(member) {
+					this.members.push(member);
+				}
 			}
 			
 			calendar = new Calendar(document.getElementById('calendar'), 'en', function(date) {
-				$("#NewEventModal").modal('show');
+				$("#newEventModal").data("date", date);
+				$("#newEventModal .header span").text(moment(date).format("Mo MMMM, YYYY"));
+				$("#newEventModal").modal('show');
 			});
 
+			function AddNewEvent() {
 
+			}
+
+			$("#addMember").on('click', function(){
+				var member_name = $("#newMemberName").val();
+				var member_link = $("#newMemberLink").val();
+				$("#membersInNewEvent").append('<div data-name="' + member_name + '" data-link="' + member_link + '" class="member ui image label"><img src="https:\\semantic-ui.com/images/avatar/small/ade.jpg">' + member_name + '<i class="delete icon"></i></div>');
+			});
+			$(document).on('click', '.delete', function(){
+				$(this).parent().remove();
+			});
+			$("#cancel").on('click', function(){
+				$('#newEventModal').modal('hide');
+			});
+			$("#saveEvent").on('click', function(){
+				if ($("#newEventName").val().length > 1 && $("#newEventDescription").val().length > 1) {
+					AddNewEvent();
+				}
+			});
 		</script>
 	</body>
 </html>
