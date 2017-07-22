@@ -66,6 +66,8 @@
 								.member { margin: 7px 3px !important; }
 								.D { outline: none; }
 								.D:hover { background: #eaeaea !important; }
+								#newEventModal .buttons { margin-top: 20px; }
+								.D .circular { position: absolute; bottom: 5px; right: 7px;}
 		</style>
 	</head>
 	<body>
@@ -100,14 +102,14 @@
 				  <i class="add icon"></i>
 				</div>
 			  </div>
-			  <div class="field">
+			</form>
+			<div class="field">
 				  <div class="ui buttons">
 				  	<button class="ui button" id="cancel">Cancel</button>
 				  	<div class="or"></div>
-				  	<button class="ui positive button" id="saveEvent">Save</button>
+				  	<button class="ui positive button" id="saveEvent" data-tooltip="Enter name and description">Save</button>
 				  </div>
 			  </div>
-			</form>
 		  </div>
 		</div>
 		<script>
@@ -126,8 +128,17 @@
 					this.year = year;
 					var m, d1, t = [], y = '', w = 0, r = 0, n = _.reduce(moment.weekdaysShort(), function(n, ddd) { return n += '<div class="ddd" data-ddd="' + ddd + '"></div>'; }, '');
 					for (m = 0; m <= 11; m++) {
+						var event = "";
+						if (EventForDate(year + '-' + ('00' + (m + 1)).slice(-2) + '-01')) {
+							event = '<div data-date="' + year + '-' + ('00' + (m + 1)).slice(-2) + '-01" class="ui teal empty tiny circular label"></div>';
+						}
 						d1 = moment([year, m, 1]);
-						t.push('<div class="MMMM">' + moment.months()[m] + '</div>' + n + '<div class="MM"><a href="#" class="' + (year == moment().year() && m == moment().month() && 1 == moment().date() ? 'active ' : '') + 'D" data-d="' + d1.day() + '" data-date="' + year + '-' + ('00' + (m + 1)).slice(-2) + '-01" draggable="false"><span class="num">1</span><div class="content"></div></a>' + _.range(2, d1.daysInMonth() + 1).reduce(function(MM, d) { return MM += '<a href="#" class="' + (year == moment().year() && m == moment().month() && d == moment().date() ? 'active ' : '') + 'D" data-date="' + year + '-' + ('00' + (m + 1)).slice(-2) + '-' + ('00' + d).slice(-2) + '" draggable="false">' + '<span class="num">' + d + '</span>' + '<div class="content"></div></a>'; }, '') + '</div>');
+						t.push('<div class="MMMM">' + moment.months()[m] + '</div>' + n + '<div class="MM"><a href="#" class="' + (year == moment().year() && m == moment().month() && 1 == moment().date() ? 'active ' : '') + 'D" data-d="' + d1.day() + '" data-date="' + year + '-' + ('00' + (m + 1)).slice(-2) + '-01" draggable="false"><span class="num" data-date="' + year + '-' + ('00' + (m + 1)).slice(-2) + '-01">1</span>' + event + '</a>' + _.range(2, d1.daysInMonth() + 1).reduce(function(MM, d) { 
+							var event = "";
+							if (EventForDate(year + '-' + ('00' + (m + 1)).slice(-2) + '-' + ('00' + d).slice(-2))) {
+								event = '<div data-date="' + year + '-' + ('00' + (m + 1)).slice(-2) + '-' + ('00' + d).slice(-2) + '" class="ui teal empty tiny circular label"></div>';
+							}
+							return MM += '<a href="#" class="' + (year == moment().year() && m == moment().month() && d == moment().date() ? 'active ' : '') + 'D" data-date="' + year + '-' + ('00' + (m + 1)).slice(-2) + '-' + ('00' + d).slice(-2) + '" draggable="false">' + '<span class="num" data-date="' + year + '-' + ('00' + (m + 1)).slice(-2) + '-' + ('00' + d).slice(-2) + '">' + d + '</span>' + event + '</a>'; }, '') + '</div>');
 						w = Math.max(w, Math.ceil((d1.day() + d1.daysInMonth()) / 7));
 						if (m == 3 || m == 7 || m == 11) {
 							y += '<div class="M" data-w="' + w + '">' + t.join('</div><div class="M" data-w="' + w + '">') + '</div>';
@@ -189,19 +200,51 @@
 					return this.description;
 				}
 
+				set Description(value) {
+					this.description = value;
+				}
 				AddMember(member) {
 					this.members.push(member);
 				}
 			}
 			
 			calendar = new Calendar(document.getElementById('calendar'), 'en', function(date) {
+				$("#newEventName").val("");
+				$("#newEventDescription").val("");
+				$("#newMemberName").val("");
+				$("#newMemberLink").val("");
+				$("#membersInNewEvent").empty();
 				$("#newEventModal").data("date", date);
 				$("#newEventModal .header span").text(moment(date).format("Mo MMMM, YYYY"));
-				$("#newEventModal").modal('show');
+				$("#newEventModal").modal({
+					blurring: true
+				}).modal('show');
 			});
 
-			function AddNewEvent() {
+			function EventForDate(date) {
+				var result = $.grep(events, function(item, i){
+					return item.Date == date;
+				});
+				if (result.length > 0) {
+					return result[0];
+				} else {
+					return null;
+				}
+			}
 
+			function AddNewEvent() {
+				var newEvent = new Event();
+				var date = $("#newEventModal").data("date");
+				newEvent.Date = date;
+				newEvent.Name = $("#newEventName").val();
+				newEvent.Description = $("#newEventDescription").val();
+				$("#membersInNewEvent .member").each(function(){
+					var member = new Member($(this).data("name"), $(this).data("link"));
+					newEvent.AddMember(member);
+				});
+				events.push(newEvent);
+				calendar.show(calendar.year);
+				$("#newEventModal").modal('hide');
 			}
 
 			$("#addMember").on('click', function(){
