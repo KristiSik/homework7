@@ -68,6 +68,7 @@
 								.D { outline: none; }
 								.D:hover { background: #eaeaea !important; color: #333333 !important; }
 								#newEventModal .buttons { margin-top: 20px; }
+								#membersInEvent { margin-bottom: 15px; }
 								.D .circular { position: absolute; bottom: 5px; right: 7px;}
 		</style>
 	</head>
@@ -89,15 +90,19 @@
 			  	<label>Members</label>
 			  	<div id="membersInNewEvent"></div>
 			  </div>
-			  <div class="field inline">
-			  	<div class="ui input">
-				  <input type="text" placeholder="Member name" id="newMemberName">
-				</div>
-				<div class="ui labeled input">
-				  <div class="ui label">
-				    https://
-				  </div>
-				  <input type="text" placeholder="facebook.com" id="newMemberLink">
+			  <div class="two fields">
+			  	<div class="field">
+		  			<div class="ui labeled input">
+				  		<div class="ui label">
+				    		vk.com/
+				  		</div>
+				  		<input type="text" placeholder="user_id" id="newMemberLink">
+					</div>
+			  	</div>
+			  	<div class="field">
+					<div class="ui input">
+					  <input type="text" readonly="" placeholder="Member name" id="newMemberName">
+					</div>
 				</div>
 				<div class="ui icon button" id="addMember">
 				  <i class="add icon"></i>
@@ -192,9 +197,10 @@
 			}
 
 			class Member {
-				constructor(name, link) {
+				constructor(name, link, photo) {
 					this.name = name;
 					this.link = link;
+					this.photo = photo;
 				}
 
 				get Name() {
@@ -203,6 +209,9 @@
 
 				get Link() {
 					return this.link;
+				}
+				get Photo() {
+					return this.photo;
 				}
 			}
 
@@ -255,10 +264,12 @@
 					}).modal('show');
 				} else {
 					$("#eventModal").data("date", event.Date);
+					$("#eventModal .header span").text(moment(event.Date).format("Mo MMMM, YYYY"));
 					$("#eventName").text(event.Name);
 					$("#eventDescrtiption").text(event.Description);
+					$("#membersInEvent").empty();
 					event.members.forEach(function(item, i, array){
-						$("#membersInEvent").append('<a class="ui image label member"><img src="https:\\semantic-ui.com/images/avatar/small/joe.jpg">' + item.Name + '</a>');
+						$("#membersInEvent").append('<a href="' + item.Link + '" target="_blank" class="ui image label member"><img src="' + item.Photo + '">' + item.Name + '</a>');
 					});
 					$("#eventModal").modal({
 						blurring: true
@@ -273,9 +284,9 @@
 					method: 'GET',
 					dataType: 'JSONP',
 					success: function(data) {
-						result = data;
+						$("#newMemberName").val(data.response[0].first_name);
+						$("#newMemberName").data("photo", data.response[0].photo);
 					}});
-				console.log(result);
 			}
 
 			function EventForDate(date) {
@@ -296,7 +307,7 @@
 				newEvent.Name = $("#newEventName").val();
 				newEvent.Description = $("#newEventDescription").val();
 				$("#membersInNewEvent .member").each(function(){
-					var member = new Member($(this).data("name"), $(this).data("link"));
+					var member = new Member($(this).data("name"), $(this).data("link"), $(this).data("photo"));
 					newEvent.AddMember(member);
 				});
 				events.push(newEvent);
@@ -306,13 +317,18 @@
 
 			$("#addMember").on('click', function(){
 				var member_name = $("#newMemberName").val();
-				var member_link = $("#newMemberLink").val();
+				var member_link = "https://vk.com/id" + $("#newMemberLink").val();
+				var member_photo = $("#newMemberName").data("photo");
 				if (member_link.length > 0 && member_name.length > 0) {
-					$("#membersInNewEvent").append('<div data-name="' + member_name + '" data-link="' + member_link + '" class="member ui image label"><img src="https:\\semantic-ui.com/images/avatar/small/ade.jpg">' + member_name + '<i class="delete icon"></i></div>');
+					$("#membersInNewEvent").append('<div data-name="' + member_name + '" data-photo="' + member_photo + '" data-link="' + member_link + '" class="member ui image label"><img src="' + member_photo + '">' + member_name + '<i class="delete icon"></i></div>');
 					$("#newMemberLink").val("");
 					$("#newMemberName").val("")
 				}
 			});
+			$("#newMemberLink").on('change', function(){
+				GetUser($(this).val());
+			});
+
 			$(document).on('click', '.delete', function(){
 				$(this).parent().remove();
 			});
